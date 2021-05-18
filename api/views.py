@@ -6,6 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 import requests
 from lxml import html
 import trafilatura
+from urllib.parse import urlparse
 
 logger = logging.getLogger(__name__)
 
@@ -24,17 +25,34 @@ def index(request: HttpRequest):
         "User-Agent": "My User Agent 1.0",
     }
     response = requests.get(url, headers=headers)
-    content = response.content
-    mytree = html.fromstring(content)
+    response_content = response.content
+    mytree = html.fromstring(response_content)
     title = mytree.find(".//title").text
-    logger.info(f"title: {title}")
+
+    description = mytree.xpath("//meta[@name='description']/@content")
+    logger.info(description)
+    description = description[0] if description else ""
+    image = mytree.xpath("//meta[@name='twitter:image']/@content")
+    logger.info(image)
+    image = image[0] if image else ""
+    
+    og_image = mytree.xpath("//meta[@property='og:image']/@content")
+    og_image = og_image[0] if og_image else ""
+    
+    parsed_uri = urlparse(url)
+    icon = "{uri.scheme}://{uri.netloc}/favicon.ico".format(uri=parsed_uri)
+
     extracted = trafilatura.extract(mytree)
     embedding = model.encode(extracted, convert_to_tensor=True)
-    logger.info(f"Embeddings: {len(embedding)}")
 
     response = {
         "url": url,
         "title": title,
-        "embedding": embedding.tolist()
+        "description": description,
+        "image": image,
+        "og_image": og_image,
+        "icon": icon,
     }
+    logger.info(response)
+    response["embedding"] = embedding.tolist()
     return JsonResponse(response)

@@ -1,3 +1,13 @@
+## Troubleshooting
+
+### Ubuntu / Linux
+
+`libpq-dev` needs to be installed.
+
+Ideally `postgresql` needs to be installed as well.
+
+Install [heroku cli](https://devcenter.heroku.com/articles/heroku-cli).
+
 # Python: Getting Started
 
 A barebones Django app, which can easily be deployed to Heroku.
