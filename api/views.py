@@ -11,13 +11,13 @@ from urllib.parse import urlparse
 logger = logging.getLogger(__name__)
 
 
-model = SentenceTransformer("paraphrase-distilroberta-base-v1")
 
 
 @csrf_exempt
 def index(request: HttpRequest):
     if (request.method != "POST"):
         return HttpResponse("Not available")
+    model = SentenceTransformer("msmarco-MiniLM-L-6-v3")
     body = json.loads(request.body)
     url = body["url"]
     logger.info(f"url: {url}")
@@ -42,6 +42,7 @@ def index(request: HttpRequest):
     parsed_uri = urlparse(url)
     icon = "{uri.scheme}://{uri.netloc}/favicon.ico".format(uri=parsed_uri)
 
+    # Trafilatura seems to modify the parsed tree and should therefore be called last or copied
     extracted = trafilatura.extract(mytree)
     embedding = model.encode(extracted, convert_to_tensor=True)
 
