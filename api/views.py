@@ -11,13 +11,13 @@ from urllib.parse import urlparse
 logger = logging.getLogger(__name__)
 
 
+model = SentenceTransformer("msmarco-MiniLM-L-6-v3")
 
 
 @csrf_exempt
 def index(request: HttpRequest):
     if (request.method != "POST"):
         return HttpResponse("Not available")
-    model = SentenceTransformer("msmarco-MiniLM-L-6-v3")
     body = json.loads(request.body)
     url = body["url"]
     logger.info(f"url: {url}")
